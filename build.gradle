@@ -5,8 +5,9 @@ plugins {
 }
 
 group = 'au.com.vodafone'
-version = '0.0.1-SNAPSHOT'
+version = '0.1'
 sourceCompatibility = '11'
+//resilience4jVersion = '1.1'
 
 repositories {
 	mavenCentral()
@@ -27,6 +28,15 @@ dependencies {
 	implementation 'com.okta.spring:okta-spring-boot-starter:2.1.5'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	runtimeOnly 'com.h2database:h2'
+
+	//resilience
+	//compile "io.github.resilience4j:resilience4j-spring-boot2:${resilience4jVersion}"
+	//compile 'org.springframework.boot:spring-boot-starter-actuator'
+	//compile('org.springframework.boot:spring-boot-starter-aop')
+	// monitoring
+	//compile "io.micrometer:micrometer-registry-prometheus:${resilience4jVersion}"
+	//compile 'io.micrometer:micrometer-registry-new-relic:latest.release'
+
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'

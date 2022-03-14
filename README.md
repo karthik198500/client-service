@@ -9,6 +9,11 @@
 
 
 # Run
+* Included the docker file.
+* docker removed license for the docker desktop so cannot use it anymore freely.
+* ./gradlew bootRun to run the application.
+* Refer to the last section on how to run the docker file.
+
 
 # Swagger API
 http://localhost:8082/swagger-ui/index.html
@@ -103,7 +108,10 @@ findAll products if required.
   used
 # Testing
 * Added Unit test cases to test the controller logic.
-* Run test .\mvnw test
+* Run test ./gradlew bootRun
+* I have added few test cases for controller alone. Can add additional tests if needed.
+* Use Mockito for Unit test cases and SpringBootTest for IntegrationTest Cases
+* Use WebMvcTest to Mock the server and context.
 
 # Improvements
 * Circuit breaker Pattern for rate limiting.
@@ -114,22 +122,27 @@ findAll products if required.
 * We can use Reactor pattern for HTTP calls to make it asynchronous and we can reactor supported databases 
   like POSTGRess which supports both ACID, scalabiliy and reactor capabilites.
 * Common design patterns that can be included in the service based on the requirements.
+
+### Design patterns that can be implemented using Resilience4j
 * Circuit breaker pattern
 * Bulkhead
+* Rate Limiting
+* Retry
+* Throttling
+### Other design patterns
 * Caching
 * Federated Identity pattern
 * Gatekeeper pattern
-* Rate Limiting
 * Sharding
-* Throttling
 * Health check( Acutator)
-* Monitoring
+* Monitoring (Logging)
 * Splunk for integration.
-* Logging and MDC to trakc the requests.
+* Logging and MDC to track the requests.
 
 
 # Health status - only Admin has access
 http://localhost:8082/acutator
+* Add beans which are related to the beans to expose the data.
 * Add beans which are related to the beans to expose the data.
 
 # Non functional requirements
@@ -245,3 +258,20 @@ for production application.
 - [ ] Force `content-type` for your response. If you return `application/json`, then your `content-type` response is `application/json`.
 - [ ] Don't return sensitive data like `credentials`, `Passwords`, or `security tokens`.
 - [ ] Return the proper status code according to the operation completed. (e.g. `200 OK`, `400 Bad Request`, `401 Unauthorized`, `405 Method Not Allowed`, etc.).
+
+
+# Docker commands.
+* Some of the docker commands to containarize the code. I do not have docker due to new restrictions on the docker dusktop
+ but just listing down how we can build a docker file and deploy it across.
+
+docker ps -a
+docker stop
+docker system prune
+docker image rm clientservice:latest
+docker image rm
+docker build -t karthik198500/clientservice:latest .
+docker run -p 8082:8082 -e "SPRING_PROFILES_ACTIVE=prod" karthik198500/clientservice:latest
+docker rmi clientservice
+docker tag clientservice:latest karthik198500/clientservice:latest
+docker push karthik198500/clientservice:latest
+docker run -p8082:8082 karthik198500/clientservice:latest
