@@ -154,17 +154,19 @@ http://localhost:8082/acutator
 * Deployed on a cloud environment with multiple services provides availability
 ### Security
 Already discussed in detail in the above section.
-### Regulatory
-### Manageability
-### Environmental
-### Interoperability
-### Usability
-### Regulatory
-### Recoverability
-### Capacity
-### Maintainability
-### Serviceability
-### Data Integrity
+
+### Other Non-functional requirements.
+* Regulatory
+* Manageability
+* Environmental
+* Interoperability
+* Usability
+* Regulatory
+* Recoverability
+* Capacity
+* Maintainability
+* Serviceability
+* Data Integrity
 
 
 # Security
