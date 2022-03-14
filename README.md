@@ -5,7 +5,8 @@
 * Java 1.8 openjdk 1.8.0_181
 * Spring Security
 * Spring Boot API
-* H2 Lite Database
+* H2 Database
+
 
 # Run
 
@@ -28,39 +29,6 @@ http://localhost:8082/swagger-ui/index.html
 * For the incoming request are validated using the Spring Boot basic validation framework.
 * Email is validated using a regex pattern and error message is sent if it does not stick to standards.
 * Custom Validators can be added in case of further level validation.
-
-# Security
-* We can use Oathu2.0 to make the application more secure.
-* Since it is communication between microservices we can think about, federated identity pattern or we can
-  think side car model or we can think about using JWT token based on the need.
-* Implementing security using Basic Authentication for time being.
-
-### Authentication using okta
-* Use the okta for authentication the app
-### Authorization using okta
-* For brevity, we want to create only two roles
-1) User - Can do CRUD operations on Client API. If required roles further
-   added for read access and write access and allow appropriate functionalities.
-2) Admin - In addition to User access, admin role user can access the health check of the
-   service.
-* Validate the request and response type
-* If content type is not matched we reject the request
-* _csrf token can be sent for update operations if being passed from the client UI.
-* All methods procted with the hasAuthorization code.
-* I have limited the logging because of being a production grade application. Logging can be enabled by changing
-  the parameters in applicaiton.properties
-* Proper status codes as per REST standards are returned.
-* ResponseEntityExceptionHandler automatically constructs all the general HTTPResponse codes based on the errors.
-* Use proper HTTP method according to operation , GET (read), POST (create), PUT (replace/update) and DELETE (delete) a record
-* Validate content-type on request Accept header
-* Send X-Content-Type-Options: nosniff header on response
-* Send X-Frame-Options: deny header.  on response
-* We can install cerificates and use HTTPS for production
-* OKta collects just email, fist name and last name of the user. No additional information needed.
-* SQL queires are geneated by spring so SQL injection will not happen, as all queries generated are 
-parameterized.
- 
-
 
 # Controller Design
 Using sychronous controller for this project
@@ -162,7 +130,118 @@ findAll products if required.
 
 # Health status - only Admin has access
 http://localhost:8082/acutator
+* Add beans which are related to the beans to expose the data.
+
+# Non functional requirements
+### Scalability
+* Since this is a stateless rest service it can be easily deployed as instance and can be scale horizantally
+* Also, we can think of using asynchronous programming or using Netty to improve performance of the web server.
+### Reliability and Data Integrity
+* Service is reliable and follows ACID principles in database.
+* SQL can be to make sure data more consistent, for the scope this exercise using in memory database.
+### Availability
+* Deployed on a cloud environment with multiple services provides availability
+### Security
+Already discussed in detail in the above section.
+### Regulatory
+### Manageability
+### Environmental
+### Interoperability
+### Usability
+### Regulatory
+### Recoverability
+### Capacity
+### Maintainability
+### Serviceability
+### Data Integrity
 
 
-http://localhost:8080/api/v1/user/role-user
-http://localhost:8080/api/v1/user/role-admin
+# Security
+* We can use Oathu2.0 to make the application more secure.
+* Since it is communication between microservices we can think about, federated identity pattern or we can
+  think side car model or we can think about using JWT token based on the need.
+* Implementing security using Basic Authentication for time being.
+* Web Application Security And OWASP - Top Ten Security Flaws.
+
+### Authentication using okta
+* Use the okta for authentication the app
+### Authorization using okta
+* For brevity, we want to create only two roles
+1) User - Can do CRUD operations on Client API. If required roles further
+   added for read access and write access and allow appropriate functionalities.
+2) Admin - In addition to User access, admin role user can access the health check of the
+   service.
+* Validate the request and response type
+* If content type is not matched we reject the request
+* _csrf token can be sent for update operations if being passed from the client UI.
+* All methods can be protected using with the hasAuthorization code.
+* I have limited the logging because of being a production grade application. Logging can be enabled by changing
+  the parameters in applicaiton.properties
+* Proper status codes as per REST standards are returned.
+* GlobalExceptionHandler automatically constructs all the general HTTPResponse codes based on the errors.
+* Use proper HTTP method according to operation , GET (read), POST (create), PUT (replace/update) and DELETE (delete) a record
+* Validate content-type on request Accept header
+* Send X-Content-Type-Options: nosniff header on response
+* Send X-Frame-Options: deny header.  on response
+* We can install cerificates and use HTTPS for production
+* OKta collects just email, fist name and last name of the user. No additional information needed.
+* SQL queires are geneated by spring so SQL injection will not happen, as all queries generated are
+  parameterized.
+
+I have copied the below from another source but for production application I definitely keep this in mind when 
+implementing the service when the service is exposed to the outside world.
+
+# API Security Checklist
+Checklist of the most important security countermeasures when designing, testing, and releasing the  API. Can Consider
+for production application.
+---
+## Authentication
+- [ ] Don't use `Basic Auth`. Use standard authentication instead (e.g. [JWT](https://jwt.io/), [OAuth](https://oauth.net/)).
+- [ ] Don't reinvent the wheel in `Authentication`, `token generation`, `password storage`. Use the standards.
+- [ ] Use `Max Retry` and jail features in Login.
+- [ ] Use encryption on all sensitive data.
+
+### JWT (JSON Web Token)
+- [ ] Use a random complicated key (`JWT Secret`) to make brute forcing the token very hard.
+- [ ] Don't extract the algorithm from the header. Force the algorithm in the backend (`HS256` or `RS256`).
+- [ ] Make token expiration (`TTL`, `RTTL`) as short as possible.
+- [ ] Don't store sensitive data in the JWT payload, it can be decoded [easily](https://jwt.io/#debugger-io).
+
+### OAuth
+- [ ] Always validate `redirect_uri` server-side to allow only whitelisted URLs.
+- [ ] Always try to exchange for code and not tokens (don't allow `response_type=token`).
+- [ ] Use `state` parameter with a random hash to prevent CSRF on the OAuth authentication process.
+- [ ] Define the default scope, and validate scope parameters for each application.
+
+## Access
+- [ ] Limit requests (Throttling) to avoid DDoS / brute-force attacks.
+- [ ] Use HTTPS on server side to avoid MITM (Man in the Middle Attack).
+- [ ] Use `HSTS` header with SSL to avoid SSL Strip attack.
+- [ ] For private APIs, only allow access from whitelisted IPs/hosts.
+
+## Input
+- [ ] Use the proper HTTP method according to the operation: `GET (read)`, `POST (create)`, `PUT/PATCH (replace/update)`, and `DELETE (to delete a record)`, and respond with `405 Method Not Allowed` if the requested method isn't appropriate for the requested resource.
+- [ ] Validate `content-type` on request Accept header (Content Negotiation) to allow only your supported format (e.g. `application/xml`, `application/json`, etc.) and respond with `406 Not Acceptable` response if not matched.
+- [ ] Validate `content-type` of posted data as you accept (e.g. `application/x-www-form-urlencoded`, `multipart/form-data`, `application/json`, etc.).
+- [ ] Validate user input to avoid common vulnerabilities (e.g. `XSS`, `SQL-Injection`, `Remote Code Execution`, etc.).
+- [ ] Don't use any sensitive data (`credentials`, `Passwords`, `security tokens`, or `API keys`) in the URL, but use standard Authorization header.
+- [ ] Use an API Gateway service to enable caching, Rate Limit policies (e.g. `Quota`, `Spike Arrest`, or `Concurrent Rate Limit`) and deploy APIs resources dynamically.
+
+## Processing
+- [ ] Check if all the endpoints are protected behind authentication to avoid broken authentication process.
+- [ ] User own resource ID should be avoided. Use `/me/orders` instead of `/user/654321/orders`.
+- [ ] Don't auto-increment IDs. Use `UUID` instead.
+- [ ] If you are parsing XML files, make sure entity parsing is not enabled to avoid `XXE` (XML external entity attack).
+- [ ] If you are parsing XML files, make sure entity expansion is not enabled to avoid `Billion Laughs/XML bomb` via exponential entity expansion attack.
+- [ ] Use a CDN for file uploads.
+- [ ] If you are dealing with huge amount of data, use Workers and Queues to process as much as possible in background and return response fast to avoid HTTP Blocking.
+- [ ] Do not forget to turn the DEBUG mode OFF.
+
+## Output
+- [ ] Send `X-Content-Type-Options: nosniff` header.
+- [ ] Send `X-Frame-Options: deny` header.
+- [ ] Send `Content-Security-Policy: default-src 'none'` header.
+- [ ] Remove fingerprinting headers - `X-Powered-By`, `Server`, `X-AspNet-Version`, etc.
+- [ ] Force `content-type` for your response. If you return `application/json`, then your `content-type` response is `application/json`.
+- [ ] Don't return sensitive data like `credentials`, `Passwords`, or `security tokens`.
+- [ ] Return the proper status code according to the operation completed. (e.g. `200 OK`, `400 Bad Request`, `401 Unauthorized`, `405 Method Not Allowed`, etc.).

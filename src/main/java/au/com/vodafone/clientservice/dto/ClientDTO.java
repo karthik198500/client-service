@@ -17,9 +17,11 @@ import javax.validation.constraints.Size;
 @Validated
 public class ClientDTO {
 
+    public ClientDTO(){
+
+    }
+
     @NotNull(message = "Id parameter name cannot be NULL.")
-    @NotBlank(message = "Id Input parameter name cannot be blank.")
-    @Size(min = 1, max = 70)
     private long id;
 
     @NotNull (message = "Name parameter name cannot be NULL.")
