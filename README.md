@@ -37,7 +37,6 @@ http://localhost:8082/swagger-ui/index.html
 
 # Controller Design
 Using sychronous controller for this project
-
 Controller can be made synchronous and asynchronous based on what we want to implement
 * Synchronous - Use Spring MVC and Spring Web dependencies.
 * Asynchronous - Use Spring Reactive API - Spring Web Flux. Since the database is still synchronous, just
@@ -46,7 +45,6 @@ Controller can be made synchronous and asynchronous based on what we want to imp
 
 # Choosing the database
 There are still some uncertainties in this use case such as
-
 * What is the max load on the API. How much load is there on the system?
 * How is the API used ?
 * Would there Read or Write Intensive tasks on the API.
@@ -74,7 +72,7 @@ I am assuming this service is mostly used by other micro services so not thinkin
 
 ### Repository Pattern
 * Spring JPA supports pagination. We can use PagingAndSortingRepository to implement pagination for 
-findAll products if required.
+findAll clients if required.
 * Repository pattern
 
 # Caching
@@ -115,7 +113,7 @@ findAll products if required.
 
 # Improvements
 * Circuit breaker Pattern for rate limiting.
-* We can use HATEOAS principles and construct production options as part of Product DTO. Will be used to navigate
+* We can use HATEOAS principles and construct production options as part of Client DTO. Will be used to navigate
   via the links.
 * Decide database on the use case.
 * Database now deletes tables once the application is stopped.
