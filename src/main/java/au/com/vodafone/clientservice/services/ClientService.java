@@ -16,7 +16,11 @@ public class ClientService {
         this.clientRepository = ClientRepository;
     }
 
-
+    /**
+     * This service can be enhanced to support transcation managment or we can use AOPs to achieve th same.
+     * Also, we can catch any database exceptions from here and construct messages which return the appropriate
+     * message using ResponseStatus.
+     * */
 
     public ClientEntity insertClient(ClientEntity client) {
         return clientRepository.save(client);

@@ -8,6 +8,7 @@ import javax.persistence.Id;
 @Entity
 public class ClientEntity {
     @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private long id;
 
     private String name;

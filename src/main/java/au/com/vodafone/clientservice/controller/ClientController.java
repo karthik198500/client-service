@@ -1,20 +1,20 @@
 package au.com.vodafone.clientservice.controller;
 
+import au.com.vodafone.clientservice.dto.ClientDTOMapper;
 import au.com.vodafone.clientservice.persistance.entities.ClientEntity;
+import au.com.vodafone.clientservice.dto.ClientDTO;
 import au.com.vodafone.clientservice.services.ClientService;
 import au.com.vodafone.clientservice.util.Constants;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.websocket.server.PathParam;
 import java.util.HashMap;
 import java.util.Optional;
 
@@ -28,12 +28,14 @@ import java.util.Optional;
 public class ClientController {
 
     private final ClientService clientService;
+    private ClientDTOMapper clientDTOMapper;
 
-    private static long idCount = 0;
-    private HashMap<Long, ClientEntity> cache = new HashMap<>();
 
-    public ClientController(ClientService clientService) {
+    private HashMap<Long, ClientDTO> cache = new HashMap<>();
+
+    public ClientController(ClientService clientService, ClientDTOMapper clientDTOMapper) {
         this.clientService = clientService;
+        this.clientDTOMapper = clientDTOMapper;
     }
 
 
@@ -45,11 +47,12 @@ public class ClientController {
             @ApiResponse(responseCode = "404", description = "Not found"),
             @ApiResponse(responseCode = "500", description = "Internal Server Error") })
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> AddUser(@RequestBody ClientEntity client){
-        client.setId(idCount++);
-        clientService.insertClient(client);
-        cache.put(client.getId(),client);
-        return ResponseEntity.ok("success");
+    public ResponseEntity<ClientDTO> AddUser(@RequestBody ClientDTO client){
+        ClientEntity clientEntity = clientDTOMapper.convertClientDTOToClientEntity(client);
+        clientEntity =  clientService.insertClient(clientEntity);
+        ClientDTO response = clientDTOMapper.convertClientEntityToClientDTO(clientEntity);
+        cache.put(client.getId(),response);
+        return ResponseEntity.ok(response);
     }
 
     @ApiOperation(value = "Get Client Information", response = String.class)
@@ -60,13 +63,13 @@ public class ClientController {
             @ApiResponse(responseCode = "404", description = "Not found"),
             @ApiResponse(responseCode = "500", description = "Internal Server Error") })
     @GetMapping( value = "/{clientId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ClientEntity> getClient(@PathVariable String clientId){
+    public ResponseEntity<ClientDTO> getClient(@PathVariable String clientId){
         if (cache.containsKey(clientId)){
             return ResponseEntity.ok(cache.get(clientId));
         }
-        return ResponseEntity.ok(clientService.getClientById(clientId));
+        return ResponseEntity.ok(clientDTOMapper.convertClientEntityToClientDTO(clientService.getClientById(clientId)));
     }
-    @ApiOperation(value = "Add Client", response = String.class)
+    @ApiOperation(value = "Delete Client", response = String.class)
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Success | OK."),
             @ApiResponse(responseCode = "401", description = "UnAuthorized"),
@@ -76,10 +79,10 @@ public class ClientController {
     @DeleteMapping( value = "{clientId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> deleteClient(@PathVariable String clientId){
         clientService.deleteClient(clientId);
-        return  ResponseEntity.ok("success");
+        return  ResponseEntity.ok("Deleted successfully.");
     }
 
-    @ApiOperation(value = "Add Client", response = String.class)
+    @ApiOperation(value = "Update Client", response = String.class)
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Success | OK."),
             @ApiResponse(responseCode = "401", description = "UnAuthorized"),
@@ -87,16 +90,21 @@ public class ClientController {
             @ApiResponse(responseCode = "404", description = "Not found"),
             @ApiResponse(responseCode = "500", description = "Internal Server Error") })
     @PutMapping(value = "{clientId}",consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> updateClient(@PathVariable String clientId,@RequestBody ClientEntity client){
+    public ResponseEntity<ClientDTO> updateClient(@PathVariable String clientId,@RequestBody ClientDTO client){
+        ClientEntity clientEntity = clientDTOMapper.convertClientDTOToClientEntity(client);
+
         Optional<ClientEntity> optionalClient  = clientService.findById(clientId);
         if (optionalClient.isPresent()) {
             ClientEntity existingClient = optionalClient.get();
-            existingClient.setId(client.getId());
-            existingClient.setName(client.getName());
-            existingClient.setEmail(client.getEmail());
-            clientService.updateClient(existingClient);
-            return  ResponseEntity.ok("success");
+            existingClient.setId(clientEntity.getId());
+            existingClient.setName(clientEntity.getName());
+            existingClient.setEmail(clientEntity.getEmail());
+            ClientEntity updatedValue = clientService.updateClient(existingClient);
+            ClientDTO response = clientDTOMapper.convertClientEntityToClientDTO(updatedValue);
+            cache.put(client.getId(),response);
+            return  ResponseEntity.ok(response);
         } else {
+            // Return REST exceptions to keep things simple.
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
