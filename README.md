@@ -264,14 +264,14 @@ for production application.
 * Some of the docker commands to containarize the code. I do not have docker due to new restrictions on the docker dusktop
  but just listing down how we can build a docker file and deploy it across.
 
-docker ps -a
-docker stop
-docker system prune
-docker image rm clientservice:latest
-docker image rm
-docker build -t karthik198500/clientservice:latest .
-docker run -p 8082:8082 -e "SPRING_PROFILES_ACTIVE=prod" karthik198500/clientservice:latest
-docker rmi clientservice
-docker tag clientservice:latest karthik198500/clientservice:latest
-docker push karthik198500/clientservice:latest
-docker run -p8082:8082 karthik198500/clientservice:latest
+* docker ps -a
+* docker stop
+* docker system prune
+* docker image rm clientservice:latest
+* docker image rm
+* docker build -t karthik198500/clientservice:latest .
+* docker run -p 8082:8082 -e "SPRING_PROFILES_ACTIVE=prod" karthik198500/clientservice:latest
+* docker rmi clientservice
+* docker tag clientservice:latest karthik198500/clientservice:latest
+* docker push karthik198500/clientservice:latest
+* docker run -p8082:8082 karthik198500/clientservice:latest
